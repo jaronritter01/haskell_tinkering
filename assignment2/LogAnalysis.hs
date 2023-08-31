@@ -1,7 +1,7 @@
 module LogAnalysis where
 
 import Data.Char (digitToInt)
-import Log
+import Log ( LogMessage(..), MessageTree(..), MessageType(..) )
 
 parseFirstNum :: String -> String
 parseFirstNum (' ' : rest)   = ""
@@ -49,17 +49,18 @@ insert newNode tree =
     case newNode of
       Unknown _ -> tree
       LogMessage _ newTimeStamp _ -> 
-        let currentValue :: Int      = getTimestamp (getCurrentNode tree)
-            rightNode :: MessageTree = getRightNode tree
-            leftNode :: MessageTree  = getLeftNode tree
+        let currentValue :: Int = getTimestamp (getCurrentNode tree)
         in
-          if newTimeStamp < currentValue
-            then case leftNode of
-              Leaf -> Node (Node Leaf newNode Leaf) (getCurrentNode tree) rightNode
-              Node leftTree message rightTree -> Node (insert newNode leftNode) (getCurrentNode tree) rightNode
-            else case rightNode of
-              Leaf -> Node leftNode (getCurrentNode tree) (Node Leaf newNode Leaf)
-              Node leftTree message rightTree -> Node rightNode (getCurrentNode tree) (insert newNode rightNode)
+          case tree of -- If the tree is just a leaf node
+            Leaf -> Node Leaf newNode Leaf
+            Node leftNode currentMessage rightNode -> -- If the tree is not just a node
+              if newTimeStamp < getTimestamp (getCurrentNode tree)
+                then case leftNode of
+                  Leaf -> Node (Node Leaf newNode Leaf) (getCurrentNode tree) rightNode
+                  Node leftTree message rightTree -> Node (insert newNode leftNode) (getCurrentNode tree) rightNode
+                else case rightNode of
+                  Leaf -> Node leftNode (getCurrentNode tree) (Node Leaf newNode Leaf)
+                  Node leftTree message rightTree -> Node rightNode (getCurrentNode tree) (insert newNode rightNode)
 
 main :: IO ()
 main = do
@@ -75,4 +76,9 @@ main = do
         \I 3753 pci 0x18fff steresocared, overne: 0000 (le wailan0: ressio0/derveld fory: alinpu-all) \n\
         \I 790 those long words, and, what's more, I don't believe you do either!' And \n\
         \I 3899 hastily.\n"
-  print (parse log)
+      messageOne = parseMessage "I 5053 pci_id: con ing!"
+      messageTwo = parseMessage " 4681 ehci 0xf43d000:15: regista14: [0xbffff 0xfed nosabled 00-02] Zonseres: brips byted nored)"
+      messageThree = parseMessage "3654 e8] PGTT ASF! 00f00000003.2: 0x000 - 0000: 00009dbfffec00000: Pround/f1743colled"
+      startTree :: MessageTree = Leaf
+      newTree = insert messageOne startTree
+  print newTree
