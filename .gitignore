@@ -1,0 +1,4 @@
+# Ignore all files without an extenion like unix exe
+!*.*
+# Ignore all exe files
+*.exe
