@@ -1,21 +1,21 @@
 module LogAnalysis where
 
 import Data.Char (digitToInt)
-import Log ( LogMessage(..), MessageTree(..), MessageType(..) )
+import Log (LogMessage (..), MessageTree (..), MessageType (..))
 
 parseFirstNum :: String -> String
-parseFirstNum (' ' : rest)   = ""
+parseFirstNum (' ' : rest) = ""
 parseFirstNum (first : rest) = first : parseFirstNum rest
 
 getNextToken :: String -> String
-getNextToken (' ' : rest)   = rest
+getNextToken (' ' : rest) = rest
 getNextToken (first : rest) = getNextToken rest
 
 parseMessageType :: String -> Maybe MessageType
 parseMessageType ('I' : ' ' : _) = Just Info
 parseMessageType ('W' : ' ' : _) = Just Warning
 parseMessageType ('E' : ' ' : n) = Just (Error (read (parseFirstNum n)))
-parseMessageType _               = Nothing
+parseMessageType _ = Nothing
 
 parseMessage :: String -> LogMessage
 parseMessage line = do
@@ -35,25 +35,25 @@ getTimestamp (LogMessage _ timestamp _) = timestamp
 
 getRightNode :: MessageTree -> MessageTree
 getRightNode (Node _ _ rightNode) = rightNode
-getRightNode Leaf                 = Leaf
+getRightNode Leaf = Leaf
 
 getLeftNode :: MessageTree -> MessageTree
 getLeftNode (Node leftNode _ _) = leftNode
-getLeftNode Leaf                = Leaf
+getLeftNode Leaf = Leaf
 
 getCurrentNode :: MessageTree -> LogMessage
 getCurrentNode (Node _ currentNode _) = currentNode
 
 insert :: LogMessage -> MessageTree -> MessageTree
 insert newNode tree =
-    case newNode of
-      Unknown _ -> tree
-      LogMessage _ newTimeStamp _ -> 
-        let currentValue :: Int = getTimestamp (getCurrentNode tree)
-        in
-          case tree of -- If the tree is just a leaf node
+  case newNode of
+    Unknown _ -> tree
+    LogMessage _ newTimeStamp _ ->
+      let currentValue :: Int = getTimestamp (getCurrentNode tree)
+       in case tree of -- If the tree is just a leaf node
             Leaf -> Node Leaf newNode Leaf
-            Node leftNode currentMessage rightNode -> -- If the tree is not just a node
+            Node leftNode currentMessage rightNode ->
+              -- If the tree is not just a node
               if newTimeStamp < getTimestamp (getCurrentNode tree) -- If the new node's ts is < the tree's headNode
                 then case leftNode of -- needs to go to the left
                   Leaf -> Node (Node Leaf newNode Leaf) (getCurrentNode tree) rightNode -- if the left node is a leaf
@@ -77,8 +77,9 @@ main = do
         \I 790 those long words, and, what's more, I don't believe you do either!' And \n\
         \I 3899 hastily.\n"
       messageOne = parseMessage "I 5053 pci_id: con ing!"
-      messageTwo = parseMessage " 4681 ehci 0xf43d000:15: regista14: [0xbffff 0xfed nosabled 00-02] Zonseres: brips byted nored)"
-      messageThree = parseMessage "3654 e8] PGTT ASF! 00f00000003.2: 0x000 - 0000: 00009dbfffec00000: Pround/f1743colled"
+      messageTwo = parseMessage "I 4681 ehci 0xf43d000:15: regista14: [0xbffff 0xfed nosabled 00-02] Zonseres: brips byted nored)"
+      messageThree = parseMessage "W 3654 e8] PGTT ASF! 00f00000003.2: 0x000 - 0000: 00009dbfffec00000: Pround/f1743colled"
       startTree :: MessageTree = Leaf
       newTree = insert messageOne startTree
-  print newTree
+      newTree2 = insert messageTwo newTree
+  print newTree2
