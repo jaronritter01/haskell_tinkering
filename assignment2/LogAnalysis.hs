@@ -54,13 +54,13 @@ insert newNode tree =
           case tree of -- If the tree is just a leaf node
             Leaf -> Node Leaf newNode Leaf
             Node leftNode currentMessage rightNode -> -- If the tree is not just a node
-              if newTimeStamp < getTimestamp (getCurrentNode tree)
-                then case leftNode of
-                  Leaf -> Node (Node Leaf newNode Leaf) (getCurrentNode tree) rightNode
-                  Node leftTree message rightTree -> Node (insert newNode leftNode) (getCurrentNode tree) rightNode
-                else case rightNode of
-                  Leaf -> Node leftNode (getCurrentNode tree) (Node Leaf newNode Leaf)
-                  Node leftTree message rightTree -> Node rightNode (getCurrentNode tree) (insert newNode rightNode)
+              if newTimeStamp < getTimestamp (getCurrentNode tree) -- If the new node's ts is < the tree's headNode
+                then case leftNode of -- needs to go to the left
+                  Leaf -> Node (Node Leaf newNode Leaf) (getCurrentNode tree) rightNode -- if the left node is a leaf
+                  Node leftTree message rightTree -> Node (insert newNode leftNode) (getCurrentNode tree) rightNode -- if it's not a leaf
+                else case rightNode of -- If the node's ts is greater than or equal to the tree's head node
+                  Leaf -> Node leftNode (getCurrentNode tree) (Node Leaf newNode Leaf) -- If the right node is a leaf
+                  Node leftTree message rightTree -> Node rightNode (getCurrentNode tree) (insert newNode rightNode) -- If the right node is not a leaf
 
 main :: IO ()
 main = do
