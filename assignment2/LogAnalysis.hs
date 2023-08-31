@@ -4,18 +4,18 @@ import Data.Char (digitToInt)
 import Log
 
 parseFirstNum :: String -> String
-parseFirstNum (' ' : rest) = ""
+parseFirstNum (' ' : rest)   = ""
 parseFirstNum (first : rest) = first : parseFirstNum rest
 
 getNextToken :: String -> String
-getNextToken (' ' : rest) = rest
+getNextToken (' ' : rest)   = rest
 getNextToken (first : rest) = getNextToken rest
 
 parseMessageType :: String -> Maybe MessageType
 parseMessageType ('I' : ' ' : _) = Just Info
 parseMessageType ('W' : ' ' : _) = Just Warning
 parseMessageType ('E' : ' ' : n) = Just (Error (read (parseFirstNum n)))
-parseMessageType _ = Nothing
+parseMessageType _               = Nothing
 
 parseMessage :: String -> LogMessage
 parseMessage line = do
@@ -35,18 +35,31 @@ getTimestamp (LogMessage _ timestamp _) = timestamp
 
 getRightNode :: MessageTree -> MessageTree
 getRightNode (Node _ _ rightNode) = rightNode
-getRightNode Leaf = Leaf
+getRightNode Leaf                 = Leaf
 
 getLeftNode :: MessageTree -> MessageTree
 getLeftNode (Node leftNode _ _) = leftNode
-getLeftNode Leaf = Leaf
+getLeftNode Leaf                = Leaf
 
--- insert :: LogMessage -> MessageTree -> MessageTree
--- insert newNode tree =
---     let nodeValue = getTimestamp newNode
---         rightNodeValue = getTimestamp (getRightNode tree)
---         leftNodeValue = getTimestamp (getLeftNode tree)
---     case nodeValue of
+getCurrentNode :: MessageTree -> LogMessage
+getCurrentNode (Node _ currentNode _) = currentNode
+
+insert :: LogMessage -> MessageTree -> MessageTree
+insert newNode tree =
+    case newNode of
+      Unknown _ -> tree
+      LogMessage _ newTimeStamp _ -> 
+        let currentValue :: Int      = getTimestamp (getCurrentNode tree)
+            rightNode :: MessageTree = getRightNode tree
+            leftNode :: MessageTree  = getLeftNode tree
+        in
+          if newTimeStamp < currentValue
+            then case leftNode of
+              Leaf -> Node (Node Leaf newNode Leaf) (getCurrentNode tree) rightNode
+              Node leftTree message rightTree -> Node (insert newNode leftNode) (getCurrentNode tree) rightNode
+            else case rightNode of
+              Leaf -> Node leftNode (getCurrentNode tree) (Node Leaf newNode Leaf)
+              Node leftTree message rightTree -> Node rightNode (getCurrentNode tree) (insert newNode rightNode)
 
 main :: IO ()
 main = do
