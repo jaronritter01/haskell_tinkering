@@ -62,6 +62,20 @@ insert newNode tree =
                   Leaf -> Node leftNode (getCurrentNode tree) (Node Leaf newNode Leaf) -- If the right node is a leaf
                   Node leftTree message rightTree -> Node rightNode (getCurrentNode tree) (insert newNode rightNode) -- If the right node is not a leaf
 
+-- Create a Build with a starting tree
+
+buildRec :: [LogMessage] -> MessageTree -> MessageTree
+buildRec messages tree =
+  case messages of
+    [] -> tree
+    firstMessage : remainingMessages -> buildRec remainingMessages (insert firstMessage tree)
+
+build :: [LogMessage] -> MessageTree
+build [] = Leaf
+build messages = buildRec messages Leaf
+
+-- To Build -> ghc -main-is LogAnalysis -o main LogAnalysis.hs
+
 main :: IO ()
 main = do
   let log =
@@ -80,6 +94,6 @@ main = do
       messageTwo = parseMessage "I 4681 ehci 0xf43d000:15: regista14: [0xbffff 0xfed nosabled 00-02] Zonseres: brips byted nored)"
       messageThree = parseMessage "W 3654 e8] PGTT ASF! 00f00000003.2: 0x000 - 0000: 00009dbfffec00000: Pround/f1743colled"
       startTree :: MessageTree = Leaf
-      newTree = insert messageOne startTree
-      newTree2 = insert messageTwo newTree
-  print newTree2
+      messages = [messageOne, messageTwo, messageThree]
+      finalTree = build messages
+  print finalTree
