@@ -25,6 +25,14 @@ skips :: [a] -> [[a]]
 skips [] = []
 skips list = [uncurry getNthElements pair | pair <- zip [list | value <- [1..length list]] [1..]]
 
+{-
+localMaxima [2,9,5,6,1] == [9,6]
+localMaxima [2,3,4,1,5] == [4]
+localMaxima [1,2,3,4,5] == []
+-}
+
+
+
 -- To Build ghc -main-is Golf -o main Golf.hs
 
 main :: IO ()
