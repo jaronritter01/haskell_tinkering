@@ -92,7 +92,7 @@ getMessage :: LogMessage -> String
 getMessage (LogMessage _ _ msg) = msg
 
 whatWentWrong :: [LogMessage] -> [String]
-whatWentWrong messages = map getMessage (inOrder (build (filter isReleventError messages)))
+whatWentWrong messages = map getMessage (filter isReleventError (inOrder (build messages)))
 
 -- To Build -> ghc -main-is LogAnalysis -o main LogAnalysis.hs
 
