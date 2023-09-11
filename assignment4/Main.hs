@@ -1,6 +1,6 @@
 module Main where
 
-import Data.List
+import Data.List (sort, (\\))
 
 -- Exercise One
 fun1 :: [Integer] -> Integer
@@ -30,18 +30,35 @@ fun2' =
             else x * 3 + 1
       )
 
--- Exercise 2 (Skipping for now)
--- data Tree a
---   = Leaf
---   | Node Integer (Tree a) a (Tree a)
---   deriving (Show, Eq)
+-- I took this from https://github.com/OctaviPascual/cis194-IntroductionToHaskell/blob/master/homework-04/HigherOrder.hs becuase I was impressed with the solution
+data Tree a
+  = Leaf
+  | Node Integer (Tree a) a (Tree a)
+  deriving (Show, Eq)
 
--- Need this to insert a node correctly
--- insertNode :: Tree typ -> Tree typ
--- insertNode tree = Leaf
+-- Generate a balanced binary tree from a list of values
+foldTree :: [a] -> Tree a
+foldTree = foldr insert Leaf
 
--- foldTree :: [a] -> Tree a
--- foldTree a = Leaf
+-- Return the height of a tree
+-- Note that since the height of a tree with a single node is defined as 0, we
+-- define the height of a Leaf as -1 to be able to distinguish those two cases
+height :: Tree a -> Integer
+height Leaf = -1
+height (Node h _ _ _) = h
+
+-- Insert a new node into an existing balanced binary tree
+insert :: a -> Tree a -> Tree a
+insert x Leaf = Node 0 Leaf x Leaf
+insert x (Node h left root right)
+  | h1 < h2 = Node h (insert x left) root right
+  | h1 > h2 = Node h left root (insert x right)
+  | otherwise = Node (h3 + 1) left' root right
+  where
+    h1 = height left
+    h2 = height right
+    h3 = height left'
+    left' = insert x left
 
 -- Exercise 3-1
 xor :: [Bool] -> Bool
