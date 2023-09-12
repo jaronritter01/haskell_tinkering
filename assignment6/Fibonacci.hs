@@ -65,10 +65,11 @@ binXor bit1 bit2 =
 xorSum :: Integer -> Integer -> Integer
 xorSum p1 p2 = sum $ binXor (toBin p1) (toBin p2)
 
--- ruler :: Stream Integer
+xorSumStream :: Stream Integer -> Stream Integer -> Stream Integer
+xorSumStream (Stream a resta) (Stream b restb) = Stream (sum $ binXor (toBin a) (toBin b)) (xorSumStream resta restb)
 
-ruler :: [Integer]
-ruler = map (subtract 1) $ zipWith xorSum [0 ..] [1 ..]
+ruler :: Stream Integer
+ruler = streamMap (subtract 1) $ xorSumStream (streamFromSeed (+ 1) 0) (streamFromSeed (+ 1) 1)
 
 main :: IO ()
-main = print $ xorSum 0 1
+main = print $ ruler
