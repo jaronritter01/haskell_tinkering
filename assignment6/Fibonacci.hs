@@ -1,5 +1,7 @@
 module Fibonacci where
 
+import Data.Bits
+
 -- Exercise 1
 fib :: Integer -> Integer
 fib 0 = 0
@@ -38,9 +40,35 @@ streamFromSeed func x = Stream x (streamFromSeed func (func x))
 
 -- Exercise 5
 nats :: Stream Integer
-nats = streamFromSeed (+1) 0
+nats = streamFromSeed (+ 1) 0
 
-ruler :: Stream Integer
+helper :: Integral t => t -> [t]
+helper 0 = []
+helper n = let (q, r) = n `divMod` 2 in r : helper q
+
+toBin :: Integral a => a -> [a]
+toBin 0 = [0]
+toBin n = reverse (helper n)
+
+padBitToLength :: Integer -> [Integer] -> [Integer]
+padBitToLength len bit =
+  if toInteger (length bit) == len
+    then bit
+    else padBitToLength len (0 : bit)
+
+binXor :: [Integer] -> [Integer] -> [Integer]
+binXor bit1 bit2 =
+  if length bit1 > length bit2
+    then zipWith xor bit1 (padBitToLength (toInteger (length bit1)) bit2)
+    else zipWith xor bit2 (padBitToLength (toInteger (length bit2)) bit1)
+
+xorSum :: Integer -> Integer -> Integer
+xorSum p1 p2 = sum $ binXor (toBin p1) (toBin p2)
+
+-- ruler :: Stream Integer
+
+ruler :: [Integer]
+ruler = map (subtract 1) $ zipWith xorSum [0 ..] [1 ..]
 
 main :: IO ()
-main = print nats
+main = print $ xorSum 0 1
