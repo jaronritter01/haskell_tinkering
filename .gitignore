@@ -8,3 +8,5 @@
 *.o
 # Ignore all Haskell Interface Files
 *.hi
+# Ignore any intellij files
+./idea
