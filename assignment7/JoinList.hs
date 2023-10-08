@@ -1,4 +1,9 @@
-import Sized
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Use isNothing" #-}
+module JoinList where
+
+import           Sized
 
 data JoinList m a
   = Empty
@@ -7,14 +12,13 @@ data JoinList m a
   deriving (Eq, Show)
 
 tag :: Monoid m => JoinList m a -> m
-tag Empty = mempty
-tag (Single m _) = m
+tag Empty          = mempty
+tag (Single m _)   = m
 tag (Append m _ _) = m
 
 (+++) :: Monoid m => JoinList m a -> JoinList m a -> JoinList m a
 (+++) list1 list2 = Append (tag list1 <> tag list2) list1 list2
 
--- Get the Int value of a Sized tag
 getSizeTag :: (Monoid b, Sized b) => JoinList b a -> Int
 getSizeTag = getSize . size . tag
 
@@ -22,8 +26,32 @@ indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
 indexJ _ Empty = Nothing
 indexJ i _ | i < 0 = Nothing
 indexJ _ (Single _ innerVal) = Just innerVal
-indexJ index (Append _ lhs rhs)
-  | index < left = indexJ index lhs
-  | otherwise = indexJ (index - left) rhs
-  where
-    left = getSizeTag lhs
+indexJ i joinList | i >= getSizeTag joinList = Nothing
+indexJ index (Append currentTag lhs rhs)
+  | index < (getSize (size currentTag) `div` 2) = indexJ index lhs
+  | otherwise =
+      let newIndex = index - 2
+       in if newIndex >= 0
+            then indexJ newIndex rhs
+            else indexJ 0 rhs
+
+testIndexJ :: Bool
+testIndexJ = do
+  let testInput = Append (Size 4) (Append (Size 2) (Single (Size 0) "a") (Single (Size 0) "b")) (Append (Size 2) (Single (Size 0) "c") (Single (Size 0) "d"))
+  and
+    [
+      indexJ (-1) testInput == Nothing,
+      indexJ 0 testInput == Just "a",
+      indexJ 1 testInput == Just "b",
+      indexJ 2 testInput == Just "c",
+      indexJ 3 testInput == Just "d",
+      indexJ 4 testInput == Nothing,
+      indexJ 5 testInput == Nothing
+    ]
+
+dropJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+dropJ index joinList | index <= 0 = joinList
+dropJ _ _ = Empty
+
+main :: IO ()
+main = print testIndexJ
