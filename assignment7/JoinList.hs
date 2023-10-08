@@ -37,7 +37,7 @@ indexJ index (Append currentTag lhs rhs)
 
 testIndexJ :: Bool
 testIndexJ = do
-  let testInput = Append (Size 4) (Append (Size 2) (Single (Size 0) "a") (Single (Size 0) "b")) (Append (Size 2) (Single (Size 0) "c") (Single (Size 0) "d"))
+  let testInput = Append (Size 4) (Append (Size 2) (Single (Size 1) "a") (Single (Size 1) "b")) (Append (Size 2) (Single (Size 1) "c") (Single (Size 1) "d"))
   and
     [
       indexJ (-1) testInput == Nothing,
