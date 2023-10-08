@@ -1,3 +1,5 @@
+import Sized
+
 data JoinList m a
   = Empty
   | Single m a
@@ -11,3 +13,9 @@ tag (Append m _ _) = m
 
 (+++) :: Monoid m => JoinList m a -> JoinList m a -> JoinList m a
 (+++) list1 list2 = Append (tag list1 <> tag list2) list1 list2
+
+indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
+indexJ _ Empty = Nothing
+indexJ i _ | i < 0 = Nothing
+indexJ _ (Single _ innerVal) = Just innerVal
+indexJ index (Append cachedVal lhs rhs) = Nothing {- TODO: Finish This -}
