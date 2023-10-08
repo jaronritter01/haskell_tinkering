@@ -59,7 +59,7 @@ dropJ index (Append cachedVal lhs rhs)
   | index <= (getSize (size cachedVal) `div` 2) =
       let newLhs = dropJ index lhs
        in Append (tag newLhs <> tag rhs) newLhs rhs
-  | otherwise = let newRhs = dropJ index rhs
+  | otherwise = let newRhs = dropJ (index - 2) rhs
        in Append (tag newRhs) Empty newRhs
 
 {- TODO: Test this -}
