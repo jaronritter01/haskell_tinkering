@@ -59,10 +59,23 @@ dropJ index (Append cachedVal lhs rhs)
   | index <= (getSize (size cachedVal) `div` 2) =
       let newLhs = dropJ index lhs
        in Append (tag newLhs <> tag rhs) newLhs rhs
-  | otherwise = let newRhs = dropJ (index - 2) rhs
+  | otherwise =
+      let newRhs = dropJ (index - 2) rhs
        in Append (tag newRhs) Empty newRhs
 
-{- TODO: Test this -}
+takeJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+takeJ index joinList -- Bounds checking
+  | index <= 0 = Empty
+  | index >= getSizeTag joinList = joinList
+takeJ _ (Single b a) = Single b a -- Passed bounds check
+takeJ index (Append cachedVal lhs rhs)
+  | index == getSize (size cachedVal) = Append cachedVal lhs rhs
+  | index <= (getSize (size cachedVal) `div` 2) = takeJ index lhs
+  | otherwise =
+      let newRhs = takeJ (index - 2) rhs
+       in Append (tag lhs <> tag newRhs) lhs newRhs
 
 main :: IO ()
-main = print testIndexJ
+main = do
+  let testInput = Append (Size 4) (Append (Size 2) (Single (Size 1) "a") (Single (Size 1) "b")) (Append (Size 2) (Single (Size 1) "c") (Single (Size 1) "d"))
+  print $ takeJ 1 testInput
