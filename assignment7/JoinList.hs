@@ -65,7 +65,7 @@ takeJ index joinList -- Bounds checking
   | index >= getSizeTag joinList = joinList
 takeJ _ (Single b a) = Single b a -- Passed bounds check
 takeJ index (Append cachedVal lhs rhs)
-  | index == getSize (size cachedVal) = Append cachedVal lhs rhs
+  | index == getSize (size cachedVal) = lhs +++ rhs
   | index <= (getSize (size cachedVal) `div` 2) = takeJ index lhs
   | otherwise = lhs +++ takeJ (index - 2) rhs
 
