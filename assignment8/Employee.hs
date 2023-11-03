@@ -72,3 +72,20 @@ moreFun :: GuestList -> GuestList -> GuestList
 moreFun (GL list1 fun1) (GL list2 fun2)
   | fun1 >= fun2 = GL list1 fun1
   | otherwise = GL list2 fun2
+
+treeFold :: (a -> [b] -> b) -> b -> Tree a -> b
+treeFold foldingFunc startingValue (Node value children) = foldingFunc value (map (treeFold foldingFunc startingValue) children)
+
+nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
+nextLevel boss bestLists = (maximumS withBossL, maximumS withoutBossL)
+  where withoutBossL   = map fst bestLists
+        withoutSubBoss = map snd bestLists
+        withBossL      = map (glCons boss) withoutSubBoss
+
+maximumS ::(Monoid a, Ord a) => [a] -> a
+maximumS [] = mempty
+maximumS lst = maximum lst
+
+maxFun :: Tree Employee -> GuestList
+maxFun tree = uncurry max res
+  where res = treeFold nextLevel (mempty, mempty) tree
